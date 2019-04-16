@@ -25,7 +25,10 @@
 #ifndef __HELLOWORLD_SCENE_H__
 #define __HELLOWORLD_SCENE_H__
 
+
 #include "cocos2d.h"
+
+USING_NS_CC;
 
 class HelloWorld : public cocos2d::Scene
 {
@@ -39,6 +42,11 @@ public:
     
     // implement the "static create()" method manually
     CREATE_FUNC(HelloWorld);
+
+	Size visibleSize;
+
+	void finishedActions();
+	void callBack(Ref* sender);
 };
 
 #endif // __HELLOWORLD_SCENE_H__

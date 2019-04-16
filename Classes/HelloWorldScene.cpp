@@ -25,7 +25,6 @@
 #include "HelloWorldScene.h"
 #include "SimpleAudioEngine.h"
 
-USING_NS_CC;
 
 Scene* HelloWorld::createScene()
 {
@@ -49,7 +48,7 @@ bool HelloWorld::init()
         return false;
     }
 
-    auto visibleSize = Director::getInstance()->getVisibleSize();
+    visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
     /////////////////////////////
@@ -83,38 +82,39 @@ bool HelloWorld::init()
     /////////////////////////////
     // 3. add your codes below...
 
-    // add a label shows "Hello World"
-    // create and initialize a label
+	Sprite* sprite = Sprite::create("res/run_01.png");
+	sprite->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
+	this->addChild(sprite);
 
-    auto label = Label::createWithTTF("Hello World", "fonts/Marker Felt.ttf", 24);
-    if (label == nullptr)
-    {
-        problemLoading("'fonts/Marker Felt.ttf'");
-    }
-    else
-    {
-        // position the label on the center of the screen
-        label->setPosition(Vec2(origin.x + visibleSize.width/2,
-                                origin.y + visibleSize.height - label->getContentSize().height));
-
-        // add the label as a child to this layer
-        this->addChild(label, 1);
-    }
-
-    // add "HelloWorld" splash screen"
-    auto sprite = Sprite::create("HelloWorld.png");
-    if (sprite == nullptr)
-    {
-        problemLoading("'HelloWorld.png'");
-    }
-    else
-    {
-        // position the sprite on the center of the screen
-        sprite->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y));
-
-        // add the sprite as a child to this layer
-        this->addChild(sprite, 0);
-    }
+	//sprite->setColor(Color3B(255, 0, 0));
+	//sprite->setOpacity(100);
+	Animation* animation = Animation::create();
+	for (int i = 1; i < 8; ++i)
+	{
+		std::string name = StringUtils::format("res/run_%02d.jpg",i);
+		animation->addSpriteFrameWithFile(name.c_str());
+	}
+	MoveBy* move = MoveBy::create(2.0, Vec2(100, 0));
+	CallFunc* func = CallFunc::create([]()
+	{
+		CCLOG("FINISHED ACTIONS");
+	});
+	CallFunc* func2 = CallFunc::create(
+		CC_CALLBACK_0(HelloWorld::finishedActions, this));
+	CallFuncN* func3 = CallFuncN::create(
+		CC_CALLBACK_1(HelloWorld::callBack,this));
+	CallFuncN* func4 = CallFuncN::create([=](Ref* sender)
+	{	
+		Sprite* mSprite = dynamic_cast<Sprite*>(sender);
+		mSprite->runAction(move->reverse());
+	});
+	animation->setDelayPerUnit(0.1f);
+	animation->setRestoreOriginalFrame(true);
+	animation->setLoops(10);
+	Animate* anim = Animate::create(animation);
+	Action *action = Sequence::create(anim, func, func2, func3,move, func4, nullptr);
+	sprite->runAction(action);
+	
     return true;
 }
 
@@ -130,4 +130,14 @@ void HelloWorld::menuCloseCallback(Ref* pSender)
     //_eventDispatcher->dispatchEvent(&customEndEvent);
 
 
+}
+
+void HelloWorld::finishedActions()
+{
+	CCLOG("FINISHED....");
+}
+
+void HelloWorld::callBack(Ref* sender)
+{
+	CCLOG("Callback");
 }
