@@ -82,46 +82,42 @@ bool HelloWorld::init()
     /////////////////////////////
     // 3. add your codes below...
 
-	// _1
-	/*Label* label = Label::createWithSystemFont("Hello\ncocos2d-x", "Arial", 40);
-	label->setPosition(winSize / 2);
-	this->addChild(label);
-	label->setHorizontalAlignment(TextHAlignment::CENTER);*/
-	
-	// _2
-	// sec = 0;
-	// std::string secString = StringUtils::toString(sec);
-	// Label* label = Label::createWithSystemFont(secString, "Arial",40);
-	// label->setPosition(winSize / 2);
-	// this->addChild(label);
- //
-	// this->schedule([=](float dt)
+	// menu _1
+	// Sprite* normalItem = Sprite::create("sun.png");
+	// Sprite* selectedItem = Sprite::create("sun.png");
+	// selectedItem->setColor(Color3B::BLUE);
+	// MenuItemSprite* item = MenuItemSprite::create(normalItem, selectedItem, [](Ref* sender)
 	// {
-	// 	sec++;
-	// 	std::string secString = StringUtils::toString(sec);
-	// 	label->setString(secString);
-	// },1.0f,"mCallBackKey");
+	// 	CCLOG("Tabbed Item");
+	// });
+	// item->setPosition(winSize / 2);
+	// Menu* mMenu = Menu::create(item, nullptr);
+	// mMenu->setPosition(Vec2());
+	// this->addChild(mMenu);
 
-	// _3 true type font
-	// Label* label = Label::createWithTTF("True Type Font",
-	// 	"fonts/Marker Felt.ttf", 40.0f);
-	// label->setPosition(winSize / 2);
-	// this->addChild(label);
-
-	// _4 TTFConfig
-	TTFConfig config;
-	config.fontFilePath = "fonts/Marker Felt.ttf";
-	config.fontSize = 40.0f;
-	config.glyphs = GlyphCollection::DYNAMIC;
-	config.outlineSize = 0;
-	config.customGlyphs = nullptr;
-	config.distanceFieldEnabled = false;
-	Label* label = Label::createWithTTF(config, "True Type Font");
-	label->setPosition(winSize / 2);
-	//label->setColor(Color3B::RED);
-	//label->enableGlow(Color4B::RED);
-	label->enableShadow(Color4B::RED, Size(5,5), 0);
-	this->addChild(label);
+	// menu _2
+	Vector<MenuItem*> menuItems;
+	for (int i = 1; i <= 3; ++i)
+	{
+		std::string name = StringUtils::format("res/menuItem_%d.png", i);
+		Sprite* normalItem = Sprite::create(name);
+		Sprite* selectedItem = Sprite::create(name);
+		selectedItem->setColor(Color3B::GRAY);
+		MenuItemSprite* item = MenuItemSprite::create(normalItem, selectedItem,
+			[](Ref* sender)
+		{
+			Node* node = dynamic_cast<Node*>(sender);
+			if (node != NULL)
+				CCLOG("Tapped item %d", node->getTag());
+		});
+		item->setTag(i);
+		menuItems.pushBack(item);
+	}
+	Menu* mMenu = Menu::createWithArray(menuItems);
+	mMenu->setPosition(winSize / 2);
+	//mMenu->alignItemsVertically();
+	mMenu->alignItemsVerticallyWithPadding(20.0f);
+	this->addChild(mMenu);
 	return true;
 }
 
