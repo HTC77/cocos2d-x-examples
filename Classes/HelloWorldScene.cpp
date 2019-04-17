@@ -93,8 +93,13 @@ bool HelloWorld::init()
 
     /////////////////////////////
     // 3. add your codes below...
-	PhysicsWorld* world;
-
+	EventListenerTouchOneByOne* listener =
+		EventListenerTouchOneByOne::create();
+	listener->onTouchBegan = CC_CALLBACK_2(HelloWorld::onTouchBegan, this);
+	// listener->onTouchMoved = CC_CALLBACK_2(HelloWorld::onTouchMoved, this);
+	// listener->onTouchEnded = CC_CALLBACK_2(HelloWorld::onTouchEnded, this);
+	this->getEventDispatcher()->addEventListenerWithFixedPriority(
+		listener, 1);
 	return true;
 
 }
@@ -121,12 +126,32 @@ void HelloWorld::onEnter()
 	Scene::onEnter();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 	_world = Director::getInstance()->getRunningScene()->getPhysicsWorld();
+	EventListenerPhysicsContact* contactListener =
+		EventListenerPhysicsContact::create();
+	contactListener->onContactBegin = [](PhysicsContact& contact)
+	{
+		static int _contacts = 0;
+		PhysicsShape* shapeA = contact.getShapeA();
+		PhysicsBody* bodyA = shapeA->getBody();
+
+		PhysicsShape* shapeB = contact.getShapeB();
+		PhysicsBody* bodyB = shapeB->getBody();
+
+		if (bodyA->getTag() == 11 && bodyB->getTag() == 11)
+		{
+			CCLOG("CONTACT BALL!!! %d", ++_contacts);
+		}
+		return true;
+	};
+
+	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(
+		contactListener, this);
 
 	//wall
 	Node* wall = Node::create();
 	PhysicsBody* wallBody = PhysicsBody::createEdgeBox(winSize,
 		PhysicsMaterial(0.1f, 1.0f, 0.0f));
-	wallBody->setContactTestBitmask(true);
+	wallBody->setContactTestBitmask(1);
 	wall->setPosition(winSize.width / 2 + origin.x, winSize.height / 2 + origin.y);
 	wall->setPhysicsBody(wallBody);
 	addChild(wall);
@@ -136,6 +161,30 @@ void HelloWorld::onEnter()
 	PhysicsBody* circleBody =
 		PhysicsBody::createCircle(sprite->getContentSize().width / 2);
 	circleBody->setDynamic(true);
+	circleBody->setTag(11);
+	circleBody->setContactTestBitmask(true);
 	sprite->setPhysicsBody(circleBody);
 	this->addChild(sprite);
+	
+}
+
+void HelloWorld::makeSprite(Vec2 position)
+{
+	Sprite* sprite = Sprite::create("CloseNormal.png");
+	sprite->setPosition(position);
+	PhysicsBody* circleBody =
+		PhysicsBody::createCircle(sprite->getContentSize().width / 2);
+	circleBody->setDynamic(true);
+	circleBody->setContactTestBitmask(true);
+	circleBody->setTag(11);
+	sprite->setPhysicsBody(circleBody);
+	this->addChild(sprite);
+}
+
+bool HelloWorld::onTouchBegan(Touch* touch, Event* event)
+{
+	Vec2 location = Director::getInstance()->convertToGL(
+		touch->getLocationInView());
+	makeSprite(location);
+	return true;
 }

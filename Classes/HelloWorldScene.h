@@ -27,7 +27,6 @@
 
 
 #include "cocos2d.h"
-
 USING_NS_CC;
 #include "ui/CocosGUI.h"
 using namespace ui;
@@ -51,6 +50,10 @@ public:
 	void callBack(Ref* sender);
 	void onEnter() override;
 	PhysicsWorld* _world;
+	void makeSprite(Vec2 position);
+	bool onTouchBegan(Touch* touch, Event* event);
+	void onTouchMoved(Touch* touch, Event* event);
+	void onTouchEnded(Touch* touch, Event* event);
 };
 
 #endif // __HELLOWORLD_SCENE_H__
