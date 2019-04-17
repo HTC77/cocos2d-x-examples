@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.2" tiledversion="1.2.0" orientation="orthogonal" renderorder="right-down" width="50" height="50" tilewidth="32" tileheight="32" infinite="0" nextlayerid="6" nextobjectid="7">
+ <tileset firstgid="1" name="tmw_desert_spacing" tilewidth="32" tileheight="32" spacing="1" margin="1" tilecount="48" columns="8">
+  <image source="tmw_desert_spacing.png" width="265" height="199"/>
+ </tileset>
+ <tileset firstgid="49" name="meta_tiles" tilewidth="32" tileheight="32" spacing="1" margin="1" tilecount="2" columns="2">
+  <image source="meta_tiles.png" width="67" height="34"/>
+  <tile id="0">
+   <properties>
+    <property name="Collidable" value="True"/>
+   </properties>
+  </tile>
+  <tile id="1">
+   <properties>
+    <property name="Collectable" value="True"/>
+   </properties>
+  </tile>
+ </tileset>
+ <layer id="1" name="Background" width="50" height="50">
+  <data encoding="base64" compression="zlib">
+   eJztlttuwyAMhul21e1qW3exU9XuRHYM7/90oxJIFsIYHCCJ5otPbQLY+cG/k71Sai8Iwr9gAP/vLPcz88DQYCwaXB8tzzPzgjzrSOiA417Hq+WzM2+EjoHQAuvqSMRqSU7uAbmvHWYFOgx4TsojPta3quPRkr7xk9ChwVnoyDhWV7U8yokX0zGCszAqXl/QOx9qmle/gticeGEM+Jza/ab8vnRG5Bxq87sArcKyGSbQI14JpoA5YwpCSw4V6JEjJ887k5L94uYozXNiTFCzBlJ51v79JAiCIKyDMwbnbu2Gub4FFwwunY4tc30PdpZrghun4ypjLsVtQd4U2F73Ylspb6jjUfG8grEh5oU6uJ6bWofUPlL7HY7X8lxunfq6hucX62NPyDn7uZiOXZCn9v6G+8jtY+Fc6rqVjlivwvpYrCf5uZQOqidi59WiX6U8Qung1EWNvhED8wgcC3Wk+ibsfZSO3u9qjrdydNR4V5dQ8o3g5+boWAuYjtL3+dx4fwnL4g+KV/r7
+  </data>
+ </layer>
+ <objectgroup id="2" name="Objects" offsetx="-1.33333" offsety="2.66667">
+  <object id="1" name="SpawnPoint" x="189.333" y="446.667"/>
+ </objectgroup>
+ <layer id="5" name="Forground" width="50" height="50">
+  <data encoding="base64" compression="zlib">
+   eJzt10kKwCAMAEB/4v9/2aOXYoltkZgZ8KiJBrfWztB3J/CDXXPqk9grOc36rI531wCAuBPu0CpvgQpzzEhdYLAfgGyynltf571jHZ5iRnPKWsuoKn8fAAAAeOsCf9MDRg==
+  </data>
+ </layer>
+ <layer id="4" name="Meta" width="50" height="50" locked="1">
+  <data encoding="base64" compression="zlib">
+   eJztmG0OwyAIhnul9f6Ha/ajyWIQ+QYdT2LWdBR5RajpdZ3BnR2AA1mabmRuSUzYM1J/0GjWfIbrCkOiYdSRzSwGLLaZjsw8YDpWWiAd0VDmXmkcfVTUQckHpMOiRq32FXXfQdcSIB1aH++9cY2x56x7poWPLzfBpjrvWSAq/qw16vNOTaC8WNW5lz8OHnNFxt/Ecmqfsn6He83hOQ+HyJ4V1T+6X53Lrn3LOu6MdVjNyY1p11xy6e+g/4vm3Wp1zog4q8y0//5WJCMfFr4gHZF45dZ6b67sRh2R9QHFsfqfo8MC7b6m3pvFD9lLdUjtOGtK0cGJZ+afYsfpPdB9LG5OvWh0cMDWVpsHSt1ZDsznTAclB9T+EYWktjB7r3xocybNxy5gOnYbTT0e8P+BsQ==
+  </data>
+ </layer>
+</map>

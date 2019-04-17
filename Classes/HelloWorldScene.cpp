@@ -28,19 +28,9 @@
 #include "ui/CocosGUI.h"
 #include "ui/UIVideoPlayer.h"
 
-using namespace  ui;
-using namespace experimental;
 Scene* HelloWorld::createScene()
 {
-	Scene* scene = Scene::createWithPhysics();
-    HelloWorld* layer = HelloWorld::create();
-	scene->addChild(layer);
-	PhysicsWorld* world = scene->getPhysicsWorld();
-	Vec2 gravity = Vec2(0, -98.0f);
-	world->setGravity(gravity);
-	world->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
-
-	return scene;
+	return HelloWorld::create();
 }
 
 // Print useful error message instead of segfaulting when files are not there.
@@ -60,8 +50,9 @@ bool HelloWorld::init()
         return false;
     }
 
+    visibleSize = Director::getInstance()->getVisibleSize();
     winSize = Director::getInstance()->getWinSize();
-    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+    origin = Director::getInstance()->getVisibleOrigin();
 
     /////////////////////////////
     // 2. add a menu item with "X" image, which is clicked to quit the program
@@ -81,7 +72,7 @@ bool HelloWorld::init()
     }
     else
     {
-        float x = origin.x + winSize.width - closeItem->getContentSize().width/2;
+        float x = origin.x + visibleSize.width - closeItem->getContentSize().width/2;
         float y = origin.y + closeItem->getContentSize().height/2;
         closeItem->setPosition(Vec2(x,y));
     }
@@ -97,13 +88,19 @@ bool HelloWorld::init()
 		EventListenerTouchOneByOne::create();
 	listener->onTouchBegan = CC_CALLBACK_2(HelloWorld::onTouchBegan, this);
 	// listener->onTouchMoved = CC_CALLBACK_2(HelloWorld::onTouchMoved, this);
-	// listener->onTouchEnded = CC_CALLBACK_2(HelloWorld::onTouchEnded, this);
+	listener->onTouchEnded = CC_CALLBACK_2(HelloWorld::onTouchEnded, this);
 	this->getEventDispatcher()->addEventListenerWithFixedPriority(
 		listener, 1);
+
+	_map = TMXTiledMap::create("TileMap2.tmx");
+	_map->setPosition(Vec2() + origin);
+	this->addChild(_map);
+	
+	_mapSize = _map->getContentSize();
+
 	return true;
 
 }
-
 
 void HelloWorld::menuCloseCallback(Ref* pSender)
 {
@@ -116,75 +113,82 @@ void HelloWorld::menuCloseCallback(Ref* pSender)
     //_eventDispatcher->dispatchEvent(&customEndEvent);
 }
 
-void HelloWorld::callBack(Ref* sender)
-{
-	CCLOG("Callback");
-}
-
 void HelloWorld::onEnter()
 {
 	Scene::onEnter();
-	Vec2 origin = Director::getInstance()->getVisibleOrigin();
-	_world = Director::getInstance()->getRunningScene()->getPhysicsWorld();
-	EventListenerPhysicsContact* contactListener =
-		EventListenerPhysicsContact::create();
-	contactListener->onContactBegin = [](PhysicsContact& contact)
-	{
-		static int _contacts = 0;
-		PhysicsShape* shapeA = contact.getShapeA();
-		PhysicsBody* bodyA = shapeA->getBody();
 
-		PhysicsShape* shapeB = contact.getShapeB();
-		PhysicsBody* bodyB = shapeB->getBody();
-
-		if (bodyA->getTag() == 11 && bodyB->getTag() == 11)
-		{
-			CCLOG("CONTACT BALL!!! %d", ++_contacts);
-		}
-		return true;
-	};
-
-	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(
-		contactListener, this);
-
-	//wall
-	Node* wall = Node::create();
-	PhysicsBody* wallBody = PhysicsBody::createEdgeBox(winSize,
-		PhysicsMaterial(0.1f, 1.0f, 0.0f));
-	wallBody->setContactTestBitmask(1);
-	wall->setPosition(winSize.width / 2 + origin.x, winSize.height / 2 + origin.y);
-	wall->setPhysicsBody(wallBody);
-	addChild(wall);
-
-	Sprite* sprite = Sprite::create("CloseNormal.png");
-	sprite->setPosition(winSize / 2);
-	PhysicsBody* circleBody =
-		PhysicsBody::createCircle(sprite->getContentSize().width / 2);
-	circleBody->setDynamic(true);
-	circleBody->setTag(11);
-	circleBody->setContactTestBitmask(true);
-	sprite->setPhysicsBody(circleBody);
-	this->addChild(sprite);
-	
 }
 
-void HelloWorld::makeSprite(Vec2 position)
-{
-	Sprite* sprite = Sprite::create("CloseNormal.png");
-	sprite->setPosition(position);
-	PhysicsBody* circleBody =
-		PhysicsBody::createCircle(sprite->getContentSize().width / 2);
-	circleBody->setDynamic(true);
-	circleBody->setContactTestBitmask(true);
-	circleBody->setTag(11);
-	sprite->setPhysicsBody(circleBody);
-	this->addChild(sprite);
-}
+
 
 bool HelloWorld::onTouchBegan(Touch* touch, Event* event)
 {
-	Vec2 location = Director::getInstance()->convertToGL(
-		touch->getLocationInView());
-	makeSprite(location);
+	Vec2 touchPoint = touch->getLocation();
+	Vect tilePoint = this->getTilePosition(touchPoint);
+	TMXLayer* groundLayer = _map->getLayer("Meta");
+	int gid = groundLayer->getTileGIDAt(tilePoint);
+	if(gid != 0)
+	{
+		ValueMap properties =
+			_map->getPropertiesForGID(gid).asValueMap();
+		if (properties.find("Collidable") != properties.end())
+			if (properties.at("Collidable").asBool())
+				CCLOG("it's Collidabel!!!");
+	}
 	return true;
+}
+
+void HelloWorld::onTouchEnded(Touch* touch, Event* event)
+{
+	Vec2 center = Vec2(visibleSize / 2) + origin;
+	_location = touch->getLocation() - center;
+	_location.x = floorf(_location.x);
+	_location.y = floorf(_location.y);
+	this->scheduleUpdate();
+}
+
+void HelloWorld::update(float delta)
+{
+	Vec2 currentLocation = _map->getPosition();
+	if (_location.x > 0){
+		currentLocation.x--;
+		_location.x--;
+	}else if(_location.x < 0) {
+		currentLocation.x++;
+		_location.x++;
+	}	
+	if (_location.y > 0) {
+		currentLocation.y--;
+		_location.y--;
+	}
+	else if (_location.y < 0) {
+		currentLocation.y++;
+		_location.y++;
+	}
+
+	if (currentLocation.x > origin.x)
+		currentLocation.x = origin.x;
+	else if (currentLocation.x < winSize.width + origin.x - _mapSize.width)
+		currentLocation.x = winSize.width + origin.x - _mapSize.width;
+	if (currentLocation.y > origin.y)
+		currentLocation.y = origin.y;
+	else if (currentLocation.y < winSize.height + origin.y - _mapSize.height)
+		currentLocation.y = winSize.height + origin.y - _mapSize.height;
+
+	_map->setPosition(currentLocation);
+	if (fabsf(_location.x) < 1.0f && fabsf(_location.y) < 1.0f)
+		this->unscheduleUpdate();
+}
+
+Vec2 HelloWorld::getTilePosition(Vec2 point)
+{
+	Vec2 tilePoint = point - _map->getPosition();
+	Size tileSize = _map->getTileSize();
+	Size mapRowCol = _map->getMapSize();
+	float scale = _mapSize.width / (mapRowCol.width *
+									tileSize.width);
+	tilePoint.x = floorf(tilePoint.x / (tileSize.width * scale));
+	tilePoint.y = floorf((_mapSize.height - tilePoint.y) /
+										(tileSize.height * scale));
+	return tilePoint;
 }

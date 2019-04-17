@@ -28,8 +28,6 @@
 
 #include "cocos2d.h"
 USING_NS_CC;
-#include "ui/CocosGUI.h"
-using namespace ui;
 class HelloWorld : public cocos2d::Scene
 {
 private:
@@ -45,15 +43,21 @@ public:
     // implement the "static create()" method manually
     CREATE_FUNC(HelloWorld);
 
+	Size visibleSize;
 	Size winSize;
+	Vec2 origin;
 
-	void callBack(Ref* sender);
 	void onEnter() override;
-	PhysicsWorld* _world;
-	void makeSprite(Vec2 position);
+
 	bool onTouchBegan(Touch* touch, Event* event);
 	void onTouchMoved(Touch* touch, Event* event);
 	void onTouchEnded(Touch* touch, Event* event);
+
+	void update(float delta) override;
+	Vec2 _location;
+	TMXTiledMap* _map;
+	Size _mapSize;
+	Vec2 getTilePosition(Vec2 point);
 };
 
 #endif // __HELLOWORLD_SCENE_H__
