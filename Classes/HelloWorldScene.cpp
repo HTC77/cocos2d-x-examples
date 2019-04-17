@@ -24,8 +24,8 @@
 
 #include "HelloWorldScene.h"
 #include "SimpleAudioEngine.h"
-
-
+#include "ui/CocosGUI.h"
+using namespace ui;
 Scene* HelloWorld::createScene()
 {
     return HelloWorld::create();
@@ -82,42 +82,51 @@ bool HelloWorld::init()
     /////////////////////////////
     // 3. add your codes below...
 
-	// menu _1
-	// Sprite* normalItem = Sprite::create("sun.png");
-	// Sprite* selectedItem = Sprite::create("sun.png");
-	// selectedItem->setColor(Color3B::BLUE);
-	// MenuItemSprite* item = MenuItemSprite::create(normalItem, selectedItem, [](Ref* sender)
-	// {
-	// 	CCLOG("Tabbed Item");
-	// });
-	// item->setPosition(winSize / 2);
-	// Menu* mMenu = Menu::create(item, nullptr);
-	// mMenu->setPosition(Vec2());
-	// this->addChild(mMenu);
-
-	// menu _2
-	Vector<MenuItem*> menuItems;
-	for (int i = 1; i <= 3; ++i)
+	// Button_1
+	/*Button* button = Button::create("res/menuItem_1.png");
+	button->setPosition(winSize / 2);
+	this->addChild(button);
+	button->addTouchEventListener([](Ref* sender, Widget::TouchEventType type)
 	{
-		std::string name = StringUtils::format("res/menuItem_%d.png", i);
-		Sprite* normalItem = Sprite::create(name);
-		Sprite* selectedItem = Sprite::create(name);
-		selectedItem->setColor(Color3B::GRAY);
-		MenuItemSprite* item = MenuItemSprite::create(normalItem, selectedItem,
-			[](Ref* sender)
+		switch(type)
 		{
-			Node* node = dynamic_cast<Node*>(sender);
-			if (node != NULL)
-				CCLOG("Tapped item %d", node->getTag());
-		});
-		item->setTag(i);
-		menuItems.pushBack(item);
-	}
-	Menu* mMenu = Menu::createWithArray(menuItems);
-	mMenu->setPosition(winSize / 2);
-	//mMenu->alignItemsVertically();
-	mMenu->alignItemsVerticallyWithPadding(20.0f);
-	this->addChild(mMenu);
+		case Widget::TouchEventType::BEGAN:
+			CCLOG("touch began");
+			break;
+		case Widget::TouchEventType::MOVED:
+			CCLOG("touch moved");
+			break;
+		case Widget::TouchEventType::ENDED:
+			CCLOG("touch ended");
+			break;
+		case Widget::TouchEventType::CANCELED:
+			CCLOG("touch canceled");
+			break;
+		default:
+			break;
+		}
+	});*/
+
+	// CheckBox_2
+	CheckBox* checkBox = CheckBox::create("res/check_box_normal.png",
+										  "res/check_box_active.png");
+	checkBox->setPosition(winSize / 2);
+	this->addChild(checkBox);
+	checkBox->addEventListener([](Ref* sender, CheckBox::EventType type)
+	{
+		switch (type)
+		{
+			case CheckBox::EventType::SELECTED:
+				CCLOG("selected checkbox");
+				break;
+			case CheckBox::EventType::UNSELECTED:
+				CCLOG("unselected checkbox");
+				break;
+			default:
+				break;
+		}
+	});
+	checkBox->setScale(3.0f);
 	return true;
 }
 
