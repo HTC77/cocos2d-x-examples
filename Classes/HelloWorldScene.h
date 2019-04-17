@@ -29,7 +29,8 @@
 #include "cocos2d.h"
 
 USING_NS_CC;
-
+#include "ui/CocosGUI.h"
+using namespace ui;
 class HelloWorld : public cocos2d::Scene
 {
 private:

@@ -82,34 +82,81 @@ bool HelloWorld::init()
     /////////////////////////////
     // 3. add your codes below...
 
-	// TextField
-	TextField* textField = TextField::create("Enter your name", "Arial",
-		30);
-	// textField->setPasswordEnabled(true);
-	textField->setPosition(Vec2(winSize.width / 2, winSize.height / 2));
-	this->addChild(textField);
-	textField->addEventListener([](Ref* sender, TextField::EventType type)
+	// _1 ScrollView
+	// ScrollView* scrollView = ScrollView::create();
+	// scrollView->setPosition(Vec2(winSize.width/2,winSize.height/2));
+	// scrollView->setDirection(ScrollView::Direction::BOTH);
+	// scrollView->setBounceEnabled(true);
+	// this->addChild(scrollView);
+	// Sprite* sprite = Sprite::create("HelloWorld.png");
+	// sprite->setScale(2.0f);
+	// sprite->setPosition(sprite->getBoundingBox().size / 2);
+	// scrollView->addChild(sprite);
+	// scrollView->setInnerContainerSize(sprite->getBoundingBox().size);
+	// scrollView->setContentSize(sprite->getContentSize());
+
+	// _2 PageView
+	//PageView* pageView = PageView::create();
+	//pageView->setPosition(winSize / 2);
+	//pageView->setContentSize(winSize);
+	//this->addChild(pageView);
+	//for (int i = 0; i < 3; ++i)
+	//{
+	//	Layout* page = Layout::create();
+	//	page->setContentSize(pageView->getContentSize());
+	//	Sprite* sprite = Sprite::create("HelloWorld.png");
+	//	sprite->setPosition(sprite->getContentSize() / 2);
+	//	page->addChild(sprite);
+	//	pageView->insertPage(page, i);
+	//}
+
+	///*pageView->addEventListener([](Ref* sender, PageView::EventType type)
+	//{
+	//	if(type == PageView::EventType::TURNING)
+	//	{
+	//		PageView* pageView = dynamic_cast<PageView*>(sender);
+	//		CCLOG("current page no= %zd",
+	//			pageView->getCurrentPageIndex());
+	//	}
+	//});*/
+
+	// _3 ListView
+	ListView* listView = ListView::create();
+	listView->setPosition(Vec2(winSize.width / 2 - 100, 0.0f));
+	listView->setDirection(ListView::Direction::VERTICAL);
+	listView->setBounceEnabled(true);
+	listView->setContentSize(winSize);
+	this->addChild(listView);
+	for (int i = 0; i < 77; ++i)
 	{
-		TextField* textField = dynamic_cast<TextField*>(sender);
-		switch (type)
-		{
-			case TextField::EventType::ATTACH_WITH_IME:
-				CCLOG("displayed keyboard");
-				break;
-			case TextField::EventType::DETACH_WITH_IME:
-				CCLOG("dismissed keyboard");
-				break;
-			case TextField::EventType::INSERT_TEXT:
-				CCLOG("inserted text: %s",
-					textField->getString().c_str());
-				break;
-			case TextField::EventType::DELETE_BACKWARD:
-				CCLOG("deleted backward");
-				break;
-			default:
-				break;
-		}
-	});
+		Layout* layout = Layout::create();
+		layout->setContentSize(Size(50, 13));
+		layout->setBackGroundColorType(Layout::BackGroundColorType::SOLID);
+		layout->setBackGroundColor(Color3B::WHITE);
+		Button* button = Button::create();
+		button->setPosition(layout->getContentSize() / 2);
+		std::string name = StringUtils::format("list item %d", i);
+		button->setTitleText(name);
+		button->setTitleFontSize(10);
+		button->setColor(Color3B::RED);
+		layout->addChild(button);
+		listView->addChild(layout);
+	}
+
+	//listView->addEventListener([](Ref* sender, ListView::EventType type)
+	//{
+	//	ListView* listView = dynamic_cast<ListView*>(sender);
+	//	switch (type)
+	//	{
+	//		case ListView::EventType::ON_SELECTED_ITEM_START:
+	//			CCLOG("select item started");
+	//			break;
+	//		case ListView::EventType::ON_SELECTED_ITEM_END:
+	//			CCLOG("selected item %zd",
+	//				listView->getCurSelectedIndex());
+	//			break;
+	//	}
+	//});
 	return true;
 }
 
