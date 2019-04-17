@@ -32,6 +32,8 @@ USING_NS_CC;
 
 class HelloWorld : public cocos2d::Scene
 {
+private:
+	int sec;
 public:
     static cocos2d::Scene* createScene();
 
@@ -43,7 +45,7 @@ public:
     // implement the "static create()" method manually
     CREATE_FUNC(HelloWorld);
 
-	Size visibleSize;
+	Size winSize;
 
 	void finishedActions();
 	void callBack(Ref* sender);

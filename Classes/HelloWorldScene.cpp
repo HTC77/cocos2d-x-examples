@@ -48,7 +48,7 @@ bool HelloWorld::init()
         return false;
     }
 
-    visibleSize = Director::getInstance()->getVisibleSize();
+    winSize = Director::getInstance()->getWinSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
     /////////////////////////////
@@ -69,7 +69,7 @@ bool HelloWorld::init()
     }
     else
     {
-        float x = origin.x + visibleSize.width - closeItem->getContentSize().width/2;
+        float x = origin.x + winSize.width - closeItem->getContentSize().width/2;
         float y = origin.y + closeItem->getContentSize().height/2;
         closeItem->setPosition(Vec2(x,y));
     }
@@ -82,40 +82,47 @@ bool HelloWorld::init()
     /////////////////////////////
     // 3. add your codes below...
 
-	Sprite* sprite = Sprite::create("res/run_01.png");
-	sprite->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
-	this->addChild(sprite);
-
-	//sprite->setColor(Color3B(255, 0, 0));
-	//sprite->setOpacity(100);
-	Animation* animation = Animation::create();
-	for (int i = 1; i < 8; ++i)
-	{
-		std::string name = StringUtils::format("res/run_%02d.jpg",i);
-		animation->addSpriteFrameWithFile(name.c_str());
-	}
-	MoveBy* move = MoveBy::create(2.0, Vec2(100, 0));
-	CallFunc* func = CallFunc::create([]()
-	{
-		CCLOG("FINISHED ACTIONS");
-	});
-	CallFunc* func2 = CallFunc::create(
-		CC_CALLBACK_0(HelloWorld::finishedActions, this));
-	CallFuncN* func3 = CallFuncN::create(
-		CC_CALLBACK_1(HelloWorld::callBack,this));
-	CallFuncN* func4 = CallFuncN::create([=](Ref* sender)
-	{	
-		Sprite* mSprite = dynamic_cast<Sprite*>(sender);
-		mSprite->runAction(move->reverse());
-	});
-	animation->setDelayPerUnit(0.1f);
-	animation->setRestoreOriginalFrame(true);
-	animation->setLoops(10);
-	Animate* anim = Animate::create(animation);
-	Action *action = Sequence::create(anim, func, func2, func3,move, func4, nullptr);
-	sprite->runAction(action);
+	// _1
+	/*Label* label = Label::createWithSystemFont("Hello\ncocos2d-x", "Arial", 40);
+	label->setPosition(winSize / 2);
+	this->addChild(label);
+	label->setHorizontalAlignment(TextHAlignment::CENTER);*/
 	
-    return true;
+	// _2
+	// sec = 0;
+	// std::string secString = StringUtils::toString(sec);
+	// Label* label = Label::createWithSystemFont(secString, "Arial",40);
+	// label->setPosition(winSize / 2);
+	// this->addChild(label);
+ //
+	// this->schedule([=](float dt)
+	// {
+	// 	sec++;
+	// 	std::string secString = StringUtils::toString(sec);
+	// 	label->setString(secString);
+	// },1.0f,"mCallBackKey");
+
+	// _3 true type font
+	// Label* label = Label::createWithTTF("True Type Font",
+	// 	"fonts/Marker Felt.ttf", 40.0f);
+	// label->setPosition(winSize / 2);
+	// this->addChild(label);
+
+	// _4 TTFConfig
+	TTFConfig config;
+	config.fontFilePath = "fonts/Marker Felt.ttf";
+	config.fontSize = 40.0f;
+	config.glyphs = GlyphCollection::DYNAMIC;
+	config.outlineSize = 0;
+	config.customGlyphs = nullptr;
+	config.distanceFieldEnabled = false;
+	Label* label = Label::createWithTTF(config, "True Type Font");
+	label->setPosition(winSize / 2);
+	//label->setColor(Color3B::RED);
+	//label->enableGlow(Color4B::RED);
+	label->enableShadow(Color4B::RED, Size(5,5), 0);
+	this->addChild(label);
+	return true;
 }
 
 
