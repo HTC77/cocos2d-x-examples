@@ -24,8 +24,8 @@
 
 #include "HelloWorldScene.h"
 #include "SimpleAudioEngine.h"
-#include "ui/CocosGUI.h"
-using namespace ui;
+#include "AudioEngine.h"
+using namespace experimental;
 Scene* HelloWorld::createScene()
 {
     return HelloWorld::create();
@@ -82,82 +82,54 @@ bool HelloWorld::init()
     /////////////////////////////
     // 3. add your codes below...
 
-	// _1 ScrollView
-	// ScrollView* scrollView = ScrollView::create();
-	// scrollView->setPosition(Vec2(winSize.width/2,winSize.height/2));
-	// scrollView->setDirection(ScrollView::Direction::BOTH);
-	// scrollView->setBounceEnabled(true);
-	// this->addChild(scrollView);
-	// Sprite* sprite = Sprite::create("HelloWorld.png");
-	// sprite->setScale(2.0f);
-	// sprite->setPosition(sprite->getBoundingBox().size / 2);
-	// scrollView->addChild(sprite);
-	// scrollView->setInnerContainerSize(sprite->getBoundingBox().size);
-	// scrollView->setContentSize(sprite->getContentSize());
+	// _1 BackgroundMusic
+	CocosDenshion::SimpleAudioEngine* audioEngine =
+		CocosDenshion::SimpleAudioEngine::getInstance();
+	// audioEngine->preloadBackgroundMusic("background.mp3");
+	// audioEngine->playBackgroundMusic("background.mp3",true);
 
-	// _2 PageView
-	//PageView* pageView = PageView::create();
-	//pageView->setPosition(winSize / 2);
-	//pageView->setContentSize(winSize);
-	//this->addChild(pageView);
-	//for (int i = 0; i < 3; ++i)
-	//{
-	//	Layout* page = Layout::create();
-	//	page->setContentSize(pageView->getContentSize());
-	//	Sprite* sprite = Sprite::create("HelloWorld.png");
-	//	sprite->setPosition(sprite->getContentSize() / 2);
-	//	page->addChild(sprite);
-	//	pageView->insertPage(page, i);
-	//}
+	// set music based on target platform:
+	/*
+	 * 	#if(CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+	 * 	#define MUSIC_FILE "background.ogg"
+	 * 	#else
+	 * 	#define MUSIC_FILE "background.caf"
+	 * 	#endif
+	 * 	audioEngine->playBackgroundMusic(MUSIC_FILE, true);
+	 */
+	// change how many sounds to play simultaneously on android :
+	/*
+	 * Cocos2dxSound.java > MAX_SIMULTANEOUS_STREAMS_DEFULT (default is 5)
+	 */
+	// _2 effect with options
+	// audioEngine->setEffectsVolume(0.5);
+	// float pitch = 1.0f;
+	// float pan = 1.0f;
+	// float gain = 1.0f;
+	// unsigned int _soundId = audioEngine->playEffect("background.mp3", true, pitch, pan, gain);
+	//
+	// audioEngine->resumeEffect(_soundId);
 
-	///*pageView->addEventListener([](Ref* sender, PageView::EventType type)
-	//{
-	//	if(type == PageView::EventType::TURNING)
-	//	{
-	//		PageView* pageView = dynamic_cast<PageView*>(sender);
-	//		CCLOG("current page no= %zd",
-	//			pageView->getCurrentPageIndex());
-	//	}
-	//});*/
-
-	// _3 ListView
-	ListView* listView = ListView::create();
-	listView->setPosition(Vec2(winSize.width / 2 - 100, 0.0f));
-	listView->setDirection(ListView::Direction::VERTICAL);
-	listView->setBounceEnabled(true);
-	listView->setContentSize(winSize);
-	this->addChild(listView);
-	for (int i = 0; i < 77; ++i)
+	// _3 background music
+	int id = AudioEngine::play2d("background.mp3");
+	AudioEngine::setLoop(id,true);
+	AudioEngine::setVolume(id, 0.5);
+	AudioEngine::pause(id);
+	AudioEngine::resume(id);
+	//AudioEngine::stop(id);
+	AudioEngine::setCurrentTime(id, 5.0);
+	AudioEngine::setFinishCallback(id, [](int audioId, std::string filePath)
 	{
-		Layout* layout = Layout::create();
-		layout->setContentSize(Size(50, 13));
-		layout->setBackGroundColorType(Layout::BackGroundColorType::SOLID);
-		layout->setBackGroundColor(Color3B::WHITE);
-		Button* button = Button::create();
-		button->setPosition(layout->getContentSize() / 2);
-		std::string name = StringUtils::format("list item %d", i);
-		button->setTitleText(name);
-		button->setTitleFontSize(10);
-		button->setColor(Color3B::RED);
-		layout->addChild(button);
-		listView->addChild(layout);
-	}
+		// this is the process when the background music was finished
+	});
 
-	//listView->addEventListener([](Ref* sender, ListView::EventType type)
-	//{
-	//	ListView* listView = dynamic_cast<ListView*>(sender);
-	//	switch (type)
-	//	{
-	//		case ListView::EventType::ON_SELECTED_ITEM_START:
-	//			CCLOG("select item started");
-	//			break;
-	//		case ListView::EventType::ON_SELECTED_ITEM_END:
-	//			CCLOG("selected item %zd",
-	//				listView->getCurSelectedIndex());
-	//			break;
-	//	}
-	//});
+
+	// Unloading Audio Files
+	/*AudioEngine::uncache("background.mp3");
+	AudioEngine::uncacheAll();*/
+
 	return true;
+
 }
 
 
