@@ -82,32 +82,33 @@ bool HelloWorld::init()
     /////////////////////////////
     // 3. add your codes below...
 
-	// _1
-	//LoadingBar* loadingBar = LoadingBar::create("res/sliderProgress.png");
-	//loadingBar->setPosition(winSize / 2);
-	//loadingBar->setPercent(0);
-	////loadingBar->setDirection(LoadingBar::Direction::RIGHT);
-	//this->addChild(loadingBar);
-	//this->schedule([=](float delta)
-	//{
-	//	float percent = loadingBar->getPercent();
-	//	percent++;
-	//	loadingBar->setPercent(percent);
-	//	if (percent >= 100)
-	//		this->unschedule("updateLoadingBar");
-	//},0.05f,"updateLoadingBar");
-
-	// _2 Slider
-	Slider* slider = Slider::create("res/sliderTrack.png",
-									"res/sliderThumb.png");
-	slider->loadProgressBarTexture("res/sliderProgress.png");
-	slider->setPosition(winSize / 2);
-	this->addChild(slider);
-	slider->addEventListener([](Ref* sender, Slider::EventType type)
+	// TextField
+	TextField* textField = TextField::create("Enter your name", "Arial",
+		30);
+	// textField->setPasswordEnabled(true);
+	textField->setPosition(Vec2(winSize.width / 2, winSize.height / 2));
+	this->addChild(textField);
+	textField->addEventListener([](Ref* sender, TextField::EventType type)
 	{
-		Slider* slider = dynamic_cast<Slider*>(sender);
-		if (type == Slider::EventType::ON_PERCENTAGE_CHANGED)
-			CCLOG("percentage: %d", slider->getPercent());
+		TextField* textField = dynamic_cast<TextField*>(sender);
+		switch (type)
+		{
+			case TextField::EventType::ATTACH_WITH_IME:
+				CCLOG("displayed keyboard");
+				break;
+			case TextField::EventType::DETACH_WITH_IME:
+				CCLOG("dismissed keyboard");
+				break;
+			case TextField::EventType::INSERT_TEXT:
+				CCLOG("inserted text: %s",
+					textField->getString().c_str());
+				break;
+			case TextField::EventType::DELETE_BACKWARD:
+				CCLOG("deleted backward");
+				break;
+			default:
+				break;
+		}
 	});
 	return true;
 }
