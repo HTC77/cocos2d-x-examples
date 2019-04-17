@@ -48,8 +48,9 @@ public:
 
 	Size winSize;
 
-	void finishedActions();
 	void callBack(Ref* sender);
+	void onEnter() override;
+	PhysicsWorld* _world;
 };
 
 #endif // __HELLOWORLD_SCENE_H__

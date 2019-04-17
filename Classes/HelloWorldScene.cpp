@@ -25,10 +25,22 @@
 #include "HelloWorldScene.h"
 #include "SimpleAudioEngine.h"
 #include "AudioEngine.h"
+#include "ui/CocosGUI.h"
+#include "ui/UIVideoPlayer.h"
+
+using namespace  ui;
 using namespace experimental;
 Scene* HelloWorld::createScene()
 {
-    return HelloWorld::create();
+	Scene* scene = Scene::createWithPhysics();
+    HelloWorld* layer = HelloWorld::create();
+	scene->addChild(layer);
+	PhysicsWorld* world = scene->getPhysicsWorld();
+	Vec2 gravity = Vec2(0, -98.0f);
+	world->setGravity(gravity);
+	world->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
+
+	return scene;
 }
 
 // Print useful error message instead of segfaulting when files are not there.
@@ -81,52 +93,7 @@ bool HelloWorld::init()
 
     /////////////////////////////
     // 3. add your codes below...
-
-	// _1 BackgroundMusic
-	CocosDenshion::SimpleAudioEngine* audioEngine =
-		CocosDenshion::SimpleAudioEngine::getInstance();
-	// audioEngine->preloadBackgroundMusic("background.mp3");
-	// audioEngine->playBackgroundMusic("background.mp3",true);
-
-	// set music based on target platform:
-	/*
-	 * 	#if(CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
-	 * 	#define MUSIC_FILE "background.ogg"
-	 * 	#else
-	 * 	#define MUSIC_FILE "background.caf"
-	 * 	#endif
-	 * 	audioEngine->playBackgroundMusic(MUSIC_FILE, true);
-	 */
-	// change how many sounds to play simultaneously on android :
-	/*
-	 * Cocos2dxSound.java > MAX_SIMULTANEOUS_STREAMS_DEFULT (default is 5)
-	 */
-	// _2 effect with options
-	// audioEngine->setEffectsVolume(0.5);
-	// float pitch = 1.0f;
-	// float pan = 1.0f;
-	// float gain = 1.0f;
-	// unsigned int _soundId = audioEngine->playEffect("background.mp3", true, pitch, pan, gain);
-	//
-	// audioEngine->resumeEffect(_soundId);
-
-	// _3 background music
-	int id = AudioEngine::play2d("background.mp3");
-	AudioEngine::setLoop(id,true);
-	AudioEngine::setVolume(id, 0.5);
-	AudioEngine::pause(id);
-	AudioEngine::resume(id);
-	//AudioEngine::stop(id);
-	AudioEngine::setCurrentTime(id, 5.0);
-	AudioEngine::setFinishCallback(id, [](int audioId, std::string filePath)
-	{
-		// this is the process when the background music was finished
-	});
-
-
-	// Unloading Audio Files
-	/*AudioEngine::uncache("background.mp3");
-	AudioEngine::uncacheAll();*/
+	PhysicsWorld* world;
 
 	return true;
 
@@ -142,16 +109,33 @@ void HelloWorld::menuCloseCallback(Ref* pSender)
 
     //EventCustom customEndEvent("game_scene_close_event");
     //_eventDispatcher->dispatchEvent(&customEndEvent);
-
-
-}
-
-void HelloWorld::finishedActions()
-{
-	CCLOG("FINISHED....");
 }
 
 void HelloWorld::callBack(Ref* sender)
 {
 	CCLOG("Callback");
+}
+
+void HelloWorld::onEnter()
+{
+	Scene::onEnter();
+	Vec2 origin = Director::getInstance()->getVisibleOrigin();
+	_world = Director::getInstance()->getRunningScene()->getPhysicsWorld();
+
+	//wall
+	Node* wall = Node::create();
+	PhysicsBody* wallBody = PhysicsBody::createEdgeBox(winSize,
+		PhysicsMaterial(0.1f, 1.0f, 0.0f));
+	wallBody->setContactTestBitmask(true);
+	wall->setPosition(winSize.width / 2 + origin.x, winSize.height / 2 + origin.y);
+	wall->setPhysicsBody(wallBody);
+	addChild(wall);
+
+	Sprite* sprite = Sprite::create("CloseNormal.png");
+	sprite->setPosition(winSize / 2);
+	PhysicsBody* circleBody =
+		PhysicsBody::createCircle(sprite->getContentSize().width / 2);
+	circleBody->setDynamic(true);
+	sprite->setPhysicsBody(circleBody);
+	this->addChild(sprite);
 }
