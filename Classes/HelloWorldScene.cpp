@@ -82,51 +82,33 @@ bool HelloWorld::init()
     /////////////////////////////
     // 3. add your codes below...
 
-	// Button_1
-	/*Button* button = Button::create("res/menuItem_1.png");
-	button->setPosition(winSize / 2);
-	this->addChild(button);
-	button->addTouchEventListener([](Ref* sender, Widget::TouchEventType type)
-	{
-		switch(type)
-		{
-		case Widget::TouchEventType::BEGAN:
-			CCLOG("touch began");
-			break;
-		case Widget::TouchEventType::MOVED:
-			CCLOG("touch moved");
-			break;
-		case Widget::TouchEventType::ENDED:
-			CCLOG("touch ended");
-			break;
-		case Widget::TouchEventType::CANCELED:
-			CCLOG("touch canceled");
-			break;
-		default:
-			break;
-		}
-	});*/
+	// _1
+	//LoadingBar* loadingBar = LoadingBar::create("res/sliderProgress.png");
+	//loadingBar->setPosition(winSize / 2);
+	//loadingBar->setPercent(0);
+	////loadingBar->setDirection(LoadingBar::Direction::RIGHT);
+	//this->addChild(loadingBar);
+	//this->schedule([=](float delta)
+	//{
+	//	float percent = loadingBar->getPercent();
+	//	percent++;
+	//	loadingBar->setPercent(percent);
+	//	if (percent >= 100)
+	//		this->unschedule("updateLoadingBar");
+	//},0.05f,"updateLoadingBar");
 
-	// CheckBox_2
-	CheckBox* checkBox = CheckBox::create("res/check_box_normal.png",
-										  "res/check_box_active.png");
-	checkBox->setPosition(winSize / 2);
-	this->addChild(checkBox);
-	checkBox->addEventListener([](Ref* sender, CheckBox::EventType type)
+	// _2 Slider
+	Slider* slider = Slider::create("res/sliderTrack.png",
+									"res/sliderThumb.png");
+	slider->loadProgressBarTexture("res/sliderProgress.png");
+	slider->setPosition(winSize / 2);
+	this->addChild(slider);
+	slider->addEventListener([](Ref* sender, Slider::EventType type)
 	{
-		switch (type)
-		{
-			case CheckBox::EventType::SELECTED:
-				CCLOG("selected checkbox");
-				break;
-			case CheckBox::EventType::UNSELECTED:
-				CCLOG("unselected checkbox");
-				break;
-			default:
-				break;
-		}
+		Slider* slider = dynamic_cast<Slider*>(sender);
+		if (type == Slider::EventType::ON_PERCENTAGE_CHANGED)
+			CCLOG("percentage: %d", slider->getPercent());
 	});
-	checkBox->setScale(3.0f);
 	return true;
 }
 
