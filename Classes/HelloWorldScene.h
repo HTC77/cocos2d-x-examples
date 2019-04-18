@@ -54,10 +54,7 @@ public:
 	void onTouchEnded(Touch* touch, Event* event);
 
 	void update(float delta) override;
-	Vec2 _location;
-	TMXTiledMap* _map;
-	Size _mapSize;
-	Vec2 getTilePosition(Vec2 point);
+
 };
 
 #endif // __HELLOWORLD_SCENE_H__
