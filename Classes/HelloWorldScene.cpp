@@ -33,8 +33,8 @@ Scene* HelloWorld::createScene()
 {
 	Scene* scene = Scene::createWithPhysics();
 	HelloWorld* layer =HelloWorld::create();
-	scene->getPhysicsWorld()->setDebugDrawMask(
-		PhysicsWorld::DEBUGDRAW_ALL);
+	/*scene->getPhysicsWorld()->setDebugDrawMask(
+		PhysicsWorld::DEBUGDRAW_ALL);*/
 	scene->addChild(layer);
 	return scene;;
 }
