@@ -23,20 +23,17 @@
  ****************************************************************************/
 
 #include "HelloWorldScene.h"
-#include "SimpleAudioEngine.h"
-#include "AudioEngine.h"
-#include "ui/CocosGUI.h"
-#include "ui/UIVideoPlayer.h"
-#include "PhysicsShapeCache.h"
+
 
 Scene* HelloWorld::createScene()
 {
-	Scene* scene = Scene::createWithPhysics();
-	HelloWorld* layer =HelloWorld::create();
-	/*scene->getPhysicsWorld()->setDebugDrawMask(
-		PhysicsWorld::DEBUGDRAW_ALL);*/
+	auto scene = Scene::createWithPhysics();
+	auto layer = HelloWorld::create();
+	auto world = scene->getPhysicsWorld();
 	scene->addChild(layer);
-	return scene;;
+	world->setGravity(Vec2(0, -98));
+	world->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
+	return scene;
 }
 
 // Print useful error message instead of segfaulting when files are not there.
@@ -56,9 +53,8 @@ bool HelloWorld::init()
         return false;
     }
 
-    visibleSize = Director::getInstance()->getVisibleSize();
-    winSize = Director::getInstance()->getWinSize();
-    origin = Director::getInstance()->getVisibleOrigin();
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
     /////////////////////////////
     // 2. add a menu item with "X" image, which is clicked to quit the program
@@ -90,26 +86,10 @@ bool HelloWorld::init()
 
     /////////////////////////////
     // 3. add your codes below...
-	EventListenerTouchOneByOne* listener =
-		EventListenerTouchOneByOne::create();
-	listener->onTouchBegan = CC_CALLBACK_2(HelloWorld::onTouchBegan, this);
-	// listener->onTouchMoved = CC_CALLBACK_2(HelloWorld::onTouchMoved, this);
-	listener->onTouchEnded = CC_CALLBACK_2(HelloWorld::onTouchEnded, this);
-	this->getEventDispatcher()->addEventListenerWithFixedPriority(
-		listener, 1);
 
-	Node* wall = Node::create();
-	PhysicsBody* wallBody = PhysicsBody::createEdgeBox(visibleSize,
-		PhysicsMaterial(0.1f, 1.0f, 0.0f));
-	wallBody->setContactTestBitmask(true);
-	wall->setPhysicsBody(wallBody);
-	wall->setPosition(Vec2(visibleSize / 2) + origin);
-	this->addChild(wall);
 
-	PhysicsShapeCache::getInstance()->addShapesWithFile("sun.plist");
 
-	return true;
-
+    return true;
 }
 
 void HelloWorld::menuCloseCallback(Ref* pSender)
@@ -121,34 +101,100 @@ void HelloWorld::menuCloseCallback(Ref* pSender)
 
     //EventCustom customEndEvent("game_scene_close_event");
     //_eventDispatcher->dispatchEvent(&customEndEvent);
+
+
+}
+
+Sprite* HelloWorld::makeSprite()
+{
+	auto sprite = Sprite::create("CloseNormal.png");
+	auto physicsBody = PhysicsBody::createCircle(sprite->getContentSize().width / 2);
+	physicsBody->setDynamic(true);
+	physicsBody->setContactTestBitmask(true);
+	sprite->setPhysicsBody(physicsBody);
+	return sprite;
 }
 
 void HelloWorld::onEnter()
 {
 	Scene::onEnter();
+	Size visibleSize = Director::getInstance()->getVisibleSize();
+	Vec2 origin = Director::getInstance()->getVisibleOrigin();
+	_world = Director::getInstance()->getRunningScene()->getPhysicsWorld();
 
+	// wall
+	auto wall = Node::create();
+	auto wallBody = PhysicsBody::createEdgeBox(visibleSize,
+		PhysicsMaterial(0.1f, 1.0f, 0.0f));
+	wallBody->setContactTestBitmask(true);
+	wall->setPhysicsBody(wallBody);
+	wall->setPosition(Vec2(visibleSize.width / 2 + origin.x,
+		visibleSize.height / 2 + origin.y));
+	addChild(wall);
+
+	// gear object 1
+	auto sp1 = this->makeSprite();
+	sp1->setPosition(visibleSize / 2);
+	this->addChild(sp1);
+	// gear object 2
+	auto sp2 = this->makeSprite();
+	sp2->setPosition(Vec2(visibleSize.width / 2 + 2, visibleSize.
+		height));
+	this->addChild(sp2);
+	// joint: gear
+	auto body1 = sp1->getPhysicsBody();
+	auto body2 = sp2->getPhysicsBody();
+	auto pin1 = PhysicsJointPin::construct(body1, wallBody, sp1->getPosition());
+	_world->addJoint(pin1);
+	auto pin2 = PhysicsJointPin::construct(body2, wallBody, sp2->getPosition());
+	_world->addJoint(pin2);
+	auto joint = PhysicsJointGear::construct(body1, body2, 0.0f,
+		2.0f);
+	_world->addJoint(joint);
+
+	auto touchListener = EventListenerTouchOneByOne::create();
+	touchListener->onTouchBegan = CC_CALLBACK_2(HelloWorld::onTouchBegan, this);
+	touchListener->onTouchMoved = CC_CALLBACK_2(HelloWorld::onTouchMoved, this);
+	touchListener->onTouchEnded = CC_CALLBACK_2(HelloWorld::onTouchEnded, this);
+	_eventDispatcher->addEventListenerWithSceneGraphPriority(touchListener, this);
 }
-
-
 
 bool HelloWorld::onTouchBegan(Touch* touch, Event* event)
 {
-	Vec2 touchPoint = touch->getLocation();
-	PhysicsBody* body = PhysicsShapeCache::getInstance()->createBodyWithName("sun");
-	body->setContactTestBitmask(true);
-	Sprite* sprite = Sprite::create("sun.png");
-	sprite->setPhysicsBody(body);
-	sprite->setPosition(touchPoint);
-	this->addChild(sprite);
-	return true;
+	auto location = touch->getLocation();
+	auto shapes = _world->getShapes(location);
+	if (shapes.size() <= 0) {
+		return false;
+	}
+	PhysicsShape* shape = shapes.front();
+	PhysicsBody* body = shape->getBody();
+	if (body != nullptr) {
+		_touchNode = Node::create();
+		auto touchBody = PhysicsBody::create(PHYSICS_INFINITY,
+			PHYSICS_INFINITY);
+		_touchNode->setPhysicsBody(touchBody);
+		_touchNode->getPhysicsBody()->setDynamic(false);
+		_touchNode->setPosition(location);
+		this->addChild(_touchNode);
+		PhysicsJointPin* joint = PhysicsJointPin::construct(touchBody, body, location);
+		joint->setMaxForce(5000.0f * body->getMass());
+		_world->addJoint(joint);
+		return true;
+	}
+	return false;
+}
+
+void HelloWorld::onTouchMoved(Touch* touch, Event* event)
+{
+	if (_touchNode != nullptr) {
+		_touchNode->setPosition(touch->getLocation());
+	}
 }
 
 void HelloWorld::onTouchEnded(Touch* touch, Event* event)
 {
-	
-}
-
-void HelloWorld::update(float delta)
-{
-
+	if (_touchNode != nullptr) {
+		_touchNode->removeFromParent();
+		_touchNode = nullptr;
+	}
 }

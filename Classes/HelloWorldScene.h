@@ -25,36 +25,29 @@
 #ifndef __HELLOWORLD_SCENE_H__
 #define __HELLOWORLD_SCENE_H__
 
-
 #include "cocos2d.h"
 USING_NS_CC;
-class HelloWorld : public cocos2d::Scene
+
+class HelloWorld : public Scene
 {
-private:
-	int sec;
 public:
-    static cocos2d::Scene* createScene();
+    static Scene* createScene();
 
     virtual bool init();
     
     // a selector callback
-    void menuCloseCallback(cocos2d::Ref* pSender);
+    void menuCloseCallback(Ref* pSender);
     
     // implement the "static create()" method manually
     CREATE_FUNC(HelloWorld);
 
-	Size visibleSize;
-	Size winSize;
-	Vec2 origin;
-
+	Sprite* makeSprite();
 	void onEnter() override;
-
+	PhysicsWorld* _world;
 	bool onTouchBegan(Touch* touch, Event* event);
 	void onTouchMoved(Touch* touch, Event* event);
 	void onTouchEnded(Touch* touch, Event* event);
-
-	void update(float delta) override;
-
+	Node* _touchNode;
 };
 
 #endif // __HELLOWORLD_SCENE_H__
