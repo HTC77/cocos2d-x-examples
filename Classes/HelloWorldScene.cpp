@@ -23,17 +23,11 @@
  ****************************************************************************/
 
 #include "HelloWorldScene.h"
-
-
+#include "SimpleAudioEngine.h"
+#include "base/ZipUtils.h"
 Scene* HelloWorld::createScene()
 {
-	auto scene = Scene::createWithPhysics();
-	auto layer = HelloWorld::create();
-	auto world = scene->getPhysicsWorld();
-	scene->addChild(layer);
-	world->setGravity(Vec2(0, -98));
-	world->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
-	return scene;
+    return HelloWorld::create();
 }
 
 // Print useful error message instead of segfaulting when files are not there.
@@ -86,11 +80,15 @@ bool HelloWorld::init()
 
     /////////////////////////////
     // 3. add your codes below...
-
-
-
-    return true;
+	ZipUtils::setPvrEncryptionKey(
+		0x1eac20c2,0x68e96d98,0x02923720,0x9934dfe8);
+	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("player_anim_encrypted.plist");
+	auto sprite = Sprite::createWithSpriteFrameName("player_idle_1.png");
+	sprite->setPosition(Vec2(visibleSize / 2) + origin);
+	this->addChild(sprite);
+	return true;
 }
+
 
 void HelloWorld::menuCloseCallback(Ref* pSender)
 {
@@ -103,98 +101,4 @@ void HelloWorld::menuCloseCallback(Ref* pSender)
     //_eventDispatcher->dispatchEvent(&customEndEvent);
 
 
-}
-
-Sprite* HelloWorld::makeSprite()
-{
-	auto sprite = Sprite::create("CloseNormal.png");
-	auto physicsBody = PhysicsBody::createCircle(sprite->getContentSize().width / 2);
-	physicsBody->setDynamic(true);
-	physicsBody->setContactTestBitmask(true);
-	sprite->setPhysicsBody(physicsBody);
-	return sprite;
-}
-
-void HelloWorld::onEnter()
-{
-	Scene::onEnter();
-	Size visibleSize = Director::getInstance()->getVisibleSize();
-	Vec2 origin = Director::getInstance()->getVisibleOrigin();
-	_world = Director::getInstance()->getRunningScene()->getPhysicsWorld();
-
-	// wall
-	auto wall = Node::create();
-	auto wallBody = PhysicsBody::createEdgeBox(visibleSize,
-		PhysicsMaterial(0.1f, 1.0f, 0.0f));
-	wallBody->setContactTestBitmask(true);
-	wall->setPhysicsBody(wallBody);
-	wall->setPosition(Vec2(visibleSize.width / 2 + origin.x,
-		visibleSize.height / 2 + origin.y));
-	addChild(wall);
-
-	// gear object 1
-	auto sp1 = this->makeSprite();
-	sp1->setPosition(visibleSize / 2);
-	this->addChild(sp1);
-	// gear object 2
-	auto sp2 = this->makeSprite();
-	sp2->setPosition(Vec2(visibleSize.width / 2 + 2, visibleSize.
-		height));
-	this->addChild(sp2);
-	// joint: gear
-	auto body1 = sp1->getPhysicsBody();
-	auto body2 = sp2->getPhysicsBody();
-	auto pin1 = PhysicsJointPin::construct(body1, wallBody, sp1->getPosition());
-	_world->addJoint(pin1);
-	auto pin2 = PhysicsJointPin::construct(body2, wallBody, sp2->getPosition());
-	_world->addJoint(pin2);
-	auto joint = PhysicsJointGear::construct(body1, body2, 0.0f,
-		2.0f);
-	_world->addJoint(joint);
-
-	auto touchListener = EventListenerTouchOneByOne::create();
-	touchListener->onTouchBegan = CC_CALLBACK_2(HelloWorld::onTouchBegan, this);
-	touchListener->onTouchMoved = CC_CALLBACK_2(HelloWorld::onTouchMoved, this);
-	touchListener->onTouchEnded = CC_CALLBACK_2(HelloWorld::onTouchEnded, this);
-	_eventDispatcher->addEventListenerWithSceneGraphPriority(touchListener, this);
-}
-
-bool HelloWorld::onTouchBegan(Touch* touch, Event* event)
-{
-	auto location = touch->getLocation();
-	auto shapes = _world->getShapes(location);
-	if (shapes.size() <= 0) {
-		return false;
-	}
-	PhysicsShape* shape = shapes.front();
-	PhysicsBody* body = shape->getBody();
-	if (body != nullptr) {
-		_touchNode = Node::create();
-		auto touchBody = PhysicsBody::create(PHYSICS_INFINITY,
-			PHYSICS_INFINITY);
-		_touchNode->setPhysicsBody(touchBody);
-		_touchNode->getPhysicsBody()->setDynamic(false);
-		_touchNode->setPosition(location);
-		this->addChild(_touchNode);
-		PhysicsJointPin* joint = PhysicsJointPin::construct(touchBody, body, location);
-		joint->setMaxForce(5000.0f * body->getMass());
-		_world->addJoint(joint);
-		return true;
-	}
-	return false;
-}
-
-void HelloWorld::onTouchMoved(Touch* touch, Event* event)
-{
-	if (_touchNode != nullptr) {
-		_touchNode->setPosition(touch->getLocation());
-	}
-}
-
-void HelloWorld::onTouchEnded(Touch* touch, Event* event)
-{
-	if (_touchNode != nullptr) {
-		_touchNode->removeFromParent();
-		_touchNode = nullptr;
-	}
 }

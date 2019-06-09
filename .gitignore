@@ -5,3 +5,5 @@ proj.linux
 proj.win32
 .cocos-project.json
 CMakeLists.txt
+Classes/S.h
+Classes/S.cpp
