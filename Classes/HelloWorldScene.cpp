@@ -25,6 +25,7 @@
 #include "HelloWorldScene.h"
 #include "SimpleAudioEngine.h"
 #include "base/ZipUtils.h"
+#include "external/unzip/unzip.h"
 Scene* HelloWorld::createScene()
 {
     return HelloWorld::create();
@@ -86,9 +87,9 @@ bool HelloWorld::init()
 	auto sprite = Sprite::createWithSpriteFrameName("player_idle_1.png");
 	sprite->setPosition(Vec2(visibleSize / 2) + origin);
 	this->addChild(sprite);
+	uncompress("cocos2d-x");
 	return true;
 }
-
 
 void HelloWorld::menuCloseCallback(Ref* pSender)
 {
@@ -100,5 +101,59 @@ void HelloWorld::menuCloseCallback(Ref* pSender)
     //EventCustom customEndEvent("game_scene_close_event");
     //_eventDispatcher->dispatchEvent(&customEndEvent);
 
+}
 
+#define BUFFER_SIZE 8192
+#define MAX_FILENAME 512
+bool HelloWorld::uncompress(const char* password)
+{
+	// Open the zip file.
+	std::string outFileName = FileUtils::getInstance()->fullPathForFilename("Enemies_encrypted.zip");
+	unzFile zipFile = unzOpen(outFileName.c_str());
+	int ret = unzOpenCurrentFilePassword(zipFile, password);
+	if (ret != UNZ_OK)
+	{
+		CCLOG("can not open zip file %s", outFileName.c_str());
+		return false;
+	}
+	// Get info about zip file.
+	unz_global_info global_info;
+	if (unzGetGlobalInfo(zipFile,&global_info) != UNZ_OK)
+	{
+		CCLOG("can not read file global info of %s",
+			outFileName.c_str());
+		unzClose(zipFile);
+		return false;
+	}
+	CCLOG("start uncompressing");
+	// Loop to extract all files.
+	uLong i;
+	for (i = 0; i < global_info.number_entry; ++i)
+	{
+		// Get info about current file.
+		unz_file_info fileInfo;
+		char fileName[MAX_FILENAME];
+		if(unzGetCurrentFileInfo(zipFile,&fileInfo,fileName,MAX_FILENAME,
+			nullptr,0,nullptr,0) != UNZ_OK)
+		{
+			CCLOG("can not read file info");
+			unzClose(zipFile);
+			return false;
+		}
+		CCLOG("filename = %s", fileName);
+		unzCloseCurrentFile(zipFile);
+		// Goto next entry listed in the zip file.
+		if ((i+1)<global_info.number_entry)
+		{
+			if (unzGoToNextFile(zipFile) != UNZ_OK)
+			{
+				CCLOG("can not read next file");
+				unzClose(zipFile);
+				return false;
+			}
+		}
+	}
+	CCLOG("end uncompressing");
+	unzClose(zipFile);
+	return true;
 }

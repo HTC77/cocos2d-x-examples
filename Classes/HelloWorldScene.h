@@ -41,6 +41,8 @@ public:
     
     // implement the "static create()" method manually
     CREATE_FUNC(HelloWorld);
+
+	bool uncompress(const char* password);
 };
 
 #endif // __HELLOWORLD_SCENE_H__
