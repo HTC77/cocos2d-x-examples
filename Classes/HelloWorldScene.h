@@ -41,8 +41,10 @@ public:
     
     // implement the "static create()" method manually
     CREATE_FUNC(HelloWorld);
+    Label* label;
+    bool onTouchBegan(Touch* touch, Event* event);
+    void onTouchEnded(Touch* touch, Event* event);
 
-	bool uncompress(const char* password);
 };
 
 #endif // __HELLOWORLD_SCENE_H__

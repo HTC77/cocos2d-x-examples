@@ -24,8 +24,8 @@
 
 #include "HelloWorldScene.h"
 #include "SimpleAudioEngine.h"
-#include "base/ZipUtils.h"
-#include "external/unzip/unzip.h"
+#include "DeviceServices.h"
+
 Scene* HelloWorld::createScene()
 {
     return HelloWorld::create();
@@ -81,15 +81,51 @@ bool HelloWorld::init()
 
     /////////////////////////////
     // 3. add your codes below...
-	ZipUtils::setPvrEncryptionKey(
-		0x1eac20c2,0x68e96d98,0x02923720,0x9934dfe8);
-	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("player_anim_encrypted.plist");
-	auto sprite = Sprite::createWithSpriteFrameName("player_idle_1.png");
-	sprite->setPosition(Vec2(visibleSize / 2) + origin);
-	this->addChild(sprite);
-	uncompress("cocos2d-x");
-	return true;
+
+    // add a label shows "Hello World"
+    // create and initialize a label
+
+    label = Label::createWithTTF("Tab screen", "fonts/Marker Felt.ttf", 24);
+    if (label == nullptr)
+    {
+        problemLoading("'fonts/Marker Felt.ttf'");
+    }
+    else
+    {
+        // position the label on the center of the screen
+        label->setPosition(Vec2(origin.x + visibleSize.width/2,
+                                origin.y + visibleSize.height /2));
+
+        // add the label as a child to this layer
+        this->addChild(label, 1);
+        label->setColor(Color3B::GREEN);
+    }
+
+    // add "HelloWorld" splash screen"
+    auto sprite = Sprite::create("HelloWorld.png");
+    if (sprite == nullptr)
+    {
+        problemLoading("'HelloWorld.png'");
+    }
+    else
+    {
+        // position the sprite on the center of the screen
+        sprite->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y));
+
+        // add the sprite as a child to this layer
+        this->addChild(sprite, 0);
+        sprite->setOpacity(0.4);
+    }
+
+    // touch dispatcher
+    auto touchListener = EventListenerTouchOneByOne::create();
+    touchListener->onTouchBegan = CC_CALLBACK_2(HelloWorld::onTouchBegan, this);
+    touchListener->onTouchEnded = CC_CALLBACK_2(HelloWorld::onTouchEnded, this);
+    getEventDispatcher()->addEventListenerWithSceneGraphPriority(touchListener, this);
+
+    return true;
 }
+
 
 void HelloWorld::menuCloseCallback(Ref* pSender)
 {
@@ -101,59 +137,15 @@ void HelloWorld::menuCloseCallback(Ref* pSender)
     //EventCustom customEndEvent("game_scene_close_event");
     //_eventDispatcher->dispatchEvent(&customEndEvent);
 
+
 }
 
-#define BUFFER_SIZE 8192
-#define MAX_FILENAME 512
-bool HelloWorld::uncompress(const char* password)
-{
-	// Open the zip file.
-	std::string outFileName = FileUtils::getInstance()->fullPathForFilename("Enemies_encrypted.zip");
-	unzFile zipFile = unzOpen(outFileName.c_str());
-	int ret = unzOpenCurrentFilePassword(zipFile, password);
-	if (ret != UNZ_OK)
-	{
-		CCLOG("can not open zip file %s", outFileName.c_str());
-		return false;
-	}
-	// Get info about zip file.
-	unz_global_info global_info;
-	if (unzGetGlobalInfo(zipFile,&global_info) != UNZ_OK)
-	{
-		CCLOG("can not read file global info of %s",
-			outFileName.c_str());
-		unzClose(zipFile);
-		return false;
-	}
-	CCLOG("start uncompressing");
-	// Loop to extract all files.
-	uLong i;
-	for (i = 0; i < global_info.number_entry; ++i)
-	{
-		// Get info about current file.
-		unz_file_info fileInfo;
-		char fileName[MAX_FILENAME];
-		if(unzGetCurrentFileInfo(zipFile,&fileInfo,fileName,MAX_FILENAME,
-			nullptr,0,nullptr,0) != UNZ_OK)
-		{
-			CCLOG("can not read file info");
-			unzClose(zipFile);
-			return false;
-		}
-		CCLOG("filename = %s", fileName);
-		unzCloseCurrentFile(zipFile);
-		// Goto next entry listed in the zip file.
-		if ((i+1)<global_info.number_entry)
-		{
-			if (unzGoToNextFile(zipFile) != UNZ_OK)
-			{
-				CCLOG("can not read next file");
-				unzClose(zipFile);
-				return false;
-			}
-		}
-	}
-	CCLOG("end uncompressing");
-	unzClose(zipFile);
-	return true;
+bool HelloWorld::onTouchBegan(Touch *touch, Event *event) {
+    label->setColor(Color3B::WHITE);
+    return true;
+}
+
+void HelloWorld::onTouchEnded(Touch *touch, Event *event) {
+    DeviceServices::showToastMessage("Test message from cpp");
+    label->setColor(Color3B::GREEN);
 }
